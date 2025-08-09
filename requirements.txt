@@ -4,4 +4,4 @@ Flask-Login
 Flask-Dance
 psycopg2-binary
 python-dotenv
-stripe
+gunicorn

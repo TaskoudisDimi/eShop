@@ -1,4 +1,4 @@
-from eShop import db, create_app
+from app import db, create_app
 
 app = create_app()
 
