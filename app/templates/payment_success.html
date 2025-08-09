@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold text-center mb-8">Payment Successful</h2>
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
+        <p class="text-lg">Thank you for your purchase! Your order (#{{ order.id }}) has been placed successfully.</p>
+        <p class="mt-4">We'll send you a confirmation email soon. Your order will be shipped to: <strong>{{ order.shipping_address }}</strong></p>
+        <a href="{{ url_for('shop.orders') }}" class="block text-center mt-4 text-teal-500 hover:text-teal-600 underline">View Orders</a>
+        <a href="{{ url_for('shop.products') }}" class="block text-center mt-4 text-teal-500 hover:text-teal-600 underline">Continue Shopping</a>
+    </div>
+</section>
+{% endblock %}

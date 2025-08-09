@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container dashboard">
+    <div class="profile-card animate-fade-in">
+        <div class="profile-header">
+            <img src="https://via.placeholder.com/100" alt="Profile Avatar" class="profile-avatar">
+            <h2>Welcome, {{ current_user.name or current_user.email }}!</h2>
+            {% if current_user.theme %}
+                <p>Your selected theme: {{ current_user.theme }}</p>
+            {% endif %}
+        </div>
+        <div class="profile-actions">
+            <a class="btn btn-primary" href="{{ url_for('shop.products') }}">Shop Now</a>
+            <a class="btn btn-secondary" href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container animate-slide-in">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="stats-grid">
+        <div class="stats-card animate-scale-in">
+            <h3>Orders Placed</h3>
+            <p class="stats-value">{{ orders_count }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

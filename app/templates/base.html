@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Bag Haven</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="{{ current_user.theme if current_user.is_authenticated else config.ACTIVE_THEME | default('light') }}">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('auth.index') }}" class="logo">Bag Haven</a>
+            <div class="nav-content">
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+                    <li><a href="{{ url_for('shop.products') }}">Bags</a></li>
+                    {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('shop.view_cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('shop.orders') }}">Orders</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"><i class="fas fa-user"></i> {{ current_user.email }}</a>
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('auth.dashboard') }}">Profile</a>
+                            <a href="{{ url_for('auth.logout') }}">Logout</a>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                    <li>
+                        <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <button class="mobile-toggle" id="mobile-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section (for index.html to override) -->
+    {% block hero %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container">
+            {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Bag Haven</h3>
+                    <p>Your destination for stylish and premium bags.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+                        <li><a href="{{ url_for('shop.products') }}">Bags</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('shop.view_cart') }}">Cart</a></li>
+                        <li><a href="{{ url_for('shop.orders') }}">Orders</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <p class="footer-bottom">© 2025 Bag Haven. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-toggle')?.addEventListener('click', () => {
+            document.querySelector('.nav-content').classList.toggle('active');
+        });
+
+        // Theme toggle (client-side, update to sync with server if needed)
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const icon = document.querySelector('#theme-toggle i');
+            icon.classList.toggle('fa-moon');
+            icon.classList.toggle('fa-sun');
+        });
+    </script>
+</body>
+</html>

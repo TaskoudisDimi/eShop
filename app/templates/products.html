@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="page-title animate-fade-in">Our Products</h1>
+    
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="sort">Sort by:</label>
+            <select id="sort" class="filter-select">
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name">Name</option>
+            </select>
+        </div>
+        <div class="filter-group23">
+            <input type="text" id="search" placeholder="Search products..." class="filter-input">
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card animate-scale-in">
+            <!-- <img src="https://via.placeholder.com/300x200" alt="{{ product.name }}" class="product-image"> -->
+            <div class="card-content">
+                <h3>{{ product.name }}</h3>
+                <p class="description">{{ product.description }}</p>
+                <p class="price"><strong>Price:</strong> ${{ product.price }}</p>
+                <p class="stock {% if product.stock <= 5 %}low-stock{% endif %}">
+                    <strong>Stock:</strong> {{ product.stock }} 
+                    {% if product.stock <= 5 %}<span class="stock-badge">Low Stock!</span>{% endif %}
+                </p>
+                <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-primary">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <a href="#" class="btn btn-secondary">Previous</a>
+        <span class="page-number">Page 1</span>
+        <a href="#" class="btn btn-secondary">Next</a>
+    </div>
+</div>
+{% endblock %}

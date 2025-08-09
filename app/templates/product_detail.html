@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.description }}</p>
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Stock:</strong> {{ product.stock }}</p>
+    {% if current_user.is_authenticated %}
+    <form method="POST" action="{{ url_for('shop.add_to_cart', product_id=product.id) }}">
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}">
+            <p> Description: </p>
+        </div>
+        <button type="submit" class="btn btn-success">Add to Cart</button>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('shop.products') }}" class="btn btn-secondary mt-2">Back to Products</a>
+</div>
+{% endblock %}

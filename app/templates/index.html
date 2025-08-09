@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block hero %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title animate-slide-in">Discover Stylish Bags</h1>
+        <p class="hero-subtitle">Explore our curated collection of premium bags for every occasion.</p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Shop Now</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="container">
+    <h2 class="text-center text-3xl font-bold mb-8">Featured Bags</h2>
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card animate-scale-in">
+            <img src="{{ product.image | default('https://via.placeholder.com/300x200?text=Bag+Image') }}" class="product-image" alt="{{ product.name }}">
+            <div class="card-content">
+                <h3>{{ product.name }}</h3>
+                <p class="description">{{ product.description }}</p>
+                <p class="price">{{ product.price}}</p>
+                <form method="POST" action="{{ url_for('shop.add_to_cart', product_id=product.id) }}">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
