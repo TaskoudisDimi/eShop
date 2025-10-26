@@ -30,7 +30,6 @@ class Category(db.Model):
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship to products
     products = db.relationship("Product", backref="category", lazy=True)
 
     def __repr__(self):
@@ -64,7 +63,7 @@ class Order(db.Model):
     shipping_address = db.Column(db.String(255), nullable=True)
     payment_method = db.Column(db.String(50), nullable=True)
     transaction_id = db.Column(db.String(255))
-    # Relationship to user and order items
+
     user = db.relationship("User", backref="orders")
     items = db.relationship("OrderItem", backref="order", lazy=True)
 
@@ -78,13 +77,21 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    unit_price = db.Column(db.Float, nullable=False)  # Price at the time of order
+    unit_price = db.Column(db.Float, nullable=False) 
 
-    # Relationship to product
+
     product = db.relationship("Product", backref="order_items")
 
     def __repr__(self):
         return f"<OrderItem {self.id}>"
     
 
-    
+class Config(db.Model):
+    __tablename__ = "config"
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.String(200))
+
+    def __repr__(self):
+        return f"<Config {self.key}: {self.value}>"

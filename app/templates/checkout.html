@@ -27,7 +27,7 @@
         {% else %}
             <p class="text-red-500">Your cart is empty.</p>
         {% endif %}
-        <form method="POST" action="{{ url_for('shop.checkout') }}" class="mt-6">
+        <form method="POST" action="{{ url_for('payment.checkout') }}" class="mt-6">
             <div class="mb-4">
                 <label for="address" class="block text-gray-700 font-medium mb-2">Shipping Address</label>
                 <textarea id="address" name="address" class="w-full p-2 border border-gray-300 rounded" rows="4" required></textarea>
