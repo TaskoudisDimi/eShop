@@ -63,6 +63,7 @@ class Order(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     shipping_address = db.Column(db.String(255), nullable=True)
     payment_method = db.Column(db.String(50), nullable=True)
+    transaction_id = db.Column(db.String(255))
     # Relationship to user and order items
     user = db.relationship("User", backref="orders")
     items = db.relationship("OrderItem", backref="order", lazy=True)

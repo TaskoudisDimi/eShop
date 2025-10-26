@@ -148,7 +148,7 @@ def checkout():
         session.modified = True
 
         try:
-            # Get access token
+            # Get access token (unchanged)
             token_url = "https://demo-accounts.vivapayments.com/connect/token"
             auth_string = base64.b64encode(
                 f"{os.getenv('VIVA_CLIENT_ID')}:{os.getenv('VIVA_CLIENT_SECRET')}".encode()
@@ -167,7 +167,7 @@ def checkout():
             access_token = token_data["access_token"]
             logger.debug(f"Access token retrieved: {access_token}")
 
-            # Create payment order
+            # Create payment order (unchanged, except minor logging)
             checkout_url = "https://demo-api.vivapayments.com/checkout/v2/orders"
             headers = {
                 "Authorization": f"Bearer {access_token}",
@@ -198,11 +198,22 @@ def checkout():
             session.modified = True
             logger.debug(f"Viva.com order created: {order_code}")
 
+            # NEW: Map payment_method to Viva's paymentMethodId for preselection
+            payment_method_id = None
+            if payment_method == "card":
+                payment_method_id = os.getenv("VIVA_CARD_METHOD_ID")
+            elif payment_method == "paypal":
+                payment_method_id = os.getenv("VIVA_PAYPAL_METHOD_ID")
+            # Add more mappings here, e.g., elif payment_method == "applepay": ...
+
             # Redirect to Viva Wallet checkout page
-            checkout_url = f"https://demo.vivapayments.com/web/checkout?ref={order_code}"
-            if payment_method != "card":
-                checkout_url += f"&paymentMethod={payment_method}"
-            return redirect(checkout_url)
+            redirect_url = f"https://demo.vivapayments.com/web/checkout?ref={order_code}"
+            if payment_method_id:
+                redirect_url += f"&paymentMethodId={payment_method_id}"
+                logger.debug(f"Preselecting payment method: {payment_method} (ID: {payment_method_id})")
+            else:
+                logger.warning(f"No paymentMethodId found for {payment_method}; defaulting to cards")
+            return redirect(redirect_url)
 
         except requests.exceptions.HTTPError as e:
             logger.error(f"Viva.com API error: {str(e)}, response: {e.response.text}")
@@ -217,69 +228,69 @@ def checkout():
 
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
+# ---------------------------------------------------
 @shop.route("/payment/viva/callback/<int:order_id>", methods=["POST"])
 def payment_viva_callback(order_id):
-    # Verify webhook authenticity
     webhook_key = request.headers.get("Key")
-    if not webhook_key:
-        logger.error(f"Missing webhook key for order {order_id}")
-        return jsonify({"error": "Missing webhook key"}), 400
-
-    expected_key = os.getenv("VIVA_WEBHOOK_KEY")
-    if not expected_key or webhook_key != expected_key:
-        logger.error(f"Invalid webhook key for order {order_id}")
+    if not webhook_key or webhook_key != VIVA_WEBHOOK_KEY:
+        logger.error(f"Unauthorized webhook for order {order_id}")
         return jsonify({"error": "Invalid webhook key"}), 403
 
+    data = request.get_json() or {}
     order = Order.query.get_or_404(order_id)
-    data = request.get_json()
-    logger.debug(f"Payment callback data: {data}")
 
-    if data and data.get("statusId") == "F":
-        order.payment_status = "Paid"
-        order.status = "Completed"
+    if data.get("statusId") == "F":
+        order.payment_status, order.status = "Paid", "Completed"
         db.session.commit()
         session.pop("cart", None)
-        session.pop("order_id", None)
-        session.pop("viva_order_code", None)
-        logger.debug(f"Viva.com payment captured for order {order_id}")
         return jsonify({"status": "success"}), 200
     else:
-        order.payment_status = "Failed"
-        order.status = "Cancelled"
+        order.payment_status, order.status = "Failed", "Cancelled"
         db.session.commit()
-        logger.error(f"Viva.com payment not completed for order {order_id}: {data.get('statusId')}")
-        return jsonify({"status": "failed", "reason": data.get("statusId")}), 400
+        return jsonify({"status": "failed"}), 400
 
-@shop.route("/payment/success/<int:order_id>")
+# ---------------------------------------------------
+# Success & Cancel pages
+# ---------------------------------------------------
+@shop.route("/payment/success")
 @login_required
-def payment_success(order_id):
-    order = Order.query.get_or_404(order_id)
-    if order.user_id != current_user.id:
-        flash("Unauthorized access to order.")
-        logger.error(f"Unauthorized access to order {order_id} by user {current_user.id}")
+def payment_success():
+    # Extract info from Viva’s query params (optional)
+    order_id = session.get("order_id")
+    if not order_id:
+        flash("Payment completed, but order ID not found.")
         return redirect(url_for("shop.orders"))
-    flash("Payment successful! Order placed.")
+
+    order = Order.query.get(order_id)
+    if not order or order.user_id != current_user.id:
+        flash("Unauthorized access.")
+        return redirect(url_for("shop.orders"))
+
+    order.payment_status = "Paid"
+    order.status = "Completed"
+    db.session.commit()
+
+    flash("Payment successful! Your order is confirmed.")
+    session.pop("cart", None)
     return render_template("payment_success.html", order=order)
 
-@shop.route("/payment/cancel/<int:order_id>")
-@login_required
-def payment_cancel(order_id):
-    order = Order.query.get_or_404(order_id)
-    if order.user_id != current_user.id:
-        flash("Unauthorized access to order.")
-        logger.error(f"Unauthorized access to order {order_id} by user {current_user.id}")
-        return redirect(url_for("shop.orders"))
-    order.payment_status = "Failed"
-    order.status = "Cancelled"
-    db.session.commit()
-    session.pop("cart", None)
-    session.pop("order_id", None)
-    session.pop("viva_order_code", None)
-    flash("Payment cancelled. Please try again.")
-    return render_template("payment_cancel.html", order=order)
 
+@shop.route("/payment/cancel")
+@login_required
+def payment_cancel():
+    order_id = session.get("order_id")
+    if order_id:
+        order = Order.query.get(order_id)
+        if order:
+            order.payment_status = "Failed"
+            order.status = "Cancelled"
+            db.session.commit()
+    session.pop("cart", None)
+    flash("Payment cancelled.")
+    return render_template("payment_cancel.html")
 @shop.route("/orders")
 @login_required
+
 def orders():
     orders = Order.query.filter_by(user_id=current_user.id).all()
     return render_template("orders.html", orders=orders)
