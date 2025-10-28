@@ -11,14 +11,14 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 </head>
-<body class="{{ current_user.theme if current_user.is_authenticated else config.ACTIVE_THEME | default('light') }}">
+<body >
     <!-- Navbar -->
     <nav class="navbar">
         <div class="container">
-            <a href="{{ url_for('auth.index') }}" class="logo">Bag Haven</a>
+            <a href="{{ url_for('shop.index') }}" class="logo">Bag Haven</a>
             <div class="nav-content">
                 <ul class="nav-links">
-                    <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+                    <li><a href="{{ url_for('shop.index') }}">Home</a></li>
                     <li><a href="{{ url_for('shop.products') }}">Bags</a></li>
                     {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('shop.view_cart') }}">Cart</a></li>
@@ -26,7 +26,7 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle"><i class="fas fa-user"></i> {{ current_user.email }}</a>
                         <div class="dropdown-menu">
-                            <a href="{{ url_for('auth.dashboard') }}">Profile</a>
+                            <a href="{{ url_for('shop.dashboard') }}">Profile</a>
                             <a href="{{ url_for('auth.logout') }}">Logout</a>
                         </div>
                     </li>
@@ -34,11 +34,6 @@
                     <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                     <li><a href="{{ url_for('auth.register') }}">Register</a></li>
                     {% endif %}
-                    <li>
-                        <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                    </li>
                 </ul>
             </div>
             <button class="mobile-toggle" id="mobile-toggle">
@@ -77,7 +72,7 @@
                 <div class="footer-section">
                     <h3>Quick Links</h3>
                     <ul>
-                        <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+                        <li><a href="{{ url_for('shop.index') }}">Home</a></li>
                         <li><a href="{{ url_for('shop.products') }}">Bags</a></li>
                         {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('shop.view_cart') }}">Cart</a></li>
@@ -104,13 +99,6 @@
             document.querySelector('.nav-content').classList.toggle('active');
         });
 
-        // Theme toggle (client-side, update to sync with server if needed)
-        document.getElementById('theme-toggle')?.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const icon = document.querySelector('#theme-toggle i');
-            icon.classList.toggle('fa-moon');
-            icon.classList.toggle('fa-sun');
-        });
     </script>
 </body>
 </html>

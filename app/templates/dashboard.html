@@ -6,9 +6,6 @@
         <div class="profile-header">
             <img src="https://via.placeholder.com/100" alt="Profile Avatar" class="profile-avatar">
             <h2>Welcome, {{ current_user.name or current_user.email }}!</h2>
-            {% if current_user.theme %}
-                <p>Your selected theme: {{ current_user.theme }}</p>
-            {% endif %}
         </div>
         <div class="profile-actions">
             <a class="btn btn-primary" href="{{ url_for('shop.products') }}">Shop Now</a>

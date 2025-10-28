@@ -139,20 +139,6 @@ body.dark .dropdown-menu a:hover {
     display: block;
 }
 
-/* Theme Toggle */
-.theme-toggle {
-    background: none;
-    border: none;
-    color: #E2E8F0;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.theme-toggle:hover {
-    transform: rotate(15deg);
-}
-
 /* Mobile Toggle */
 .mobile-toggle {
     display: none;

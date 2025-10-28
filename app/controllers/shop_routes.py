@@ -1,14 +1,30 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
-from flask_login import current_user, login_required
-from .models import Product, Category, Order, OrderItem
-from . import db
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 import logging
+import os
+from google_auth_oauthlib.flow import Flow
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import pathlib
+from app.models import Product, Category, Order, OrderItem
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 shop = Blueprint("shop", __name__)
+
+@shop.route("/")
+@shop.route("/index")
+def index():
+    return render_template("index.html")
+
+@shop.route("/dashboard")
+@login_required
+def dashboard():
+    orders_count = Order.query.filter_by(user_id=current_user.id).count()
+    return render_template("dashboard.html", orders_count=orders_count, is_admin=current_user.is_admin())
 
 @shop.route("/products")
 def products():
@@ -75,6 +91,31 @@ def view_cart():
                 session["cart"].remove(item)
                 session.modified = True
     return render_template("cart.html", cart_items=cart_items, total=total)
+
+@shop.route("/delivery_info", methods=["GET", "POST"])
+@login_required
+def delivery_info():
+    if request.method == "POST":
+        address = request.form.get("address")
+        phone = request.form.get("phone")
+        floor = request.form.get("floor")
+        zipcode = request.form.get("zipcode")
+        region = request.form.get("region")
+
+        if not all([address, phone, zipcode, region]):
+            flash("All required fields (Address, Phone, Zipcode, Region) must be filled.", "error")
+            return redirect(url_for("shop.delivery_info"))
+
+        session["delivery_info"] = {
+            "address": address,
+            "phone": phone,
+            "floor": floor,
+            "zipcode": zipcode,
+            "region": region
+        }
+        session.modified = True
+        return redirect(url_for("payment.checkout"))
+    return render_template("delivery_info.html")
 
 @shop.route("/orders")
 @login_required

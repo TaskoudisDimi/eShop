@@ -30,19 +30,32 @@
         <form method="POST" action="{{ url_for('payment.checkout') }}" class="mt-6">
             <div class="mb-4">
                 <label for="address" class="block text-gray-700 font-medium mb-2">Shipping Address</label>
-                <textarea id="address" name="address" class="w-full p-2 border border-gray-300 rounded" rows="4" required></textarea>
+                <textarea id="address" name="address" class="w-full p-2 border border-gray-300 rounded" rows="4" required>{{ session.get('delivery_info', {}).get('address', '') }}</textarea>
+            </div>
+            <div class="mb-4">
+                <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="w-full p-2 border border-gray-300 rounded" value="{{ session.get('delivery_info', {}).get('phone', '') }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="floor" class="block text-gray-700 font-medium mb-2">Floor</label>
+                <input type="text" id="floor" name="floor" class="w-full p-2 border border-gray-300 rounded" value="{{ session.get('delivery_info', {}).get('floor', '') }}">
+            </div>
+            <div class="mb-4">
+                <label for="zipcode" class="block text-gray-700 font-medium mb-2">Zipcode</label>
+                <input type="text" id="zipcode" name="zipcode" class="w-full p-2 border border-gray-300 rounded" value="{{ session.get('delivery_info', {}).get('zipcode', '') }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="region" class="block text-gray-700 font-medium mb-2">Region</label>
+                <input type="text" id="region" name="region" class="w-full p-2 border border-gray-300 rounded" value="{{ session.get('delivery_info', {}).get('region', '') }}" required>
             </div>
             <div class="mb-4">
                 <label for="payment_method" class="block text-gray-700 font-medium mb-2">Payment Method</label>
                 <select id="payment_method" name="payment_method" class="w-full p-2 border border-gray-300 rounded" required>
                     <option value="card">💳 Credit/Debit Card (Visa, Mastercard, Amex, etc.)</option>
                     <option value="paypal">💰 PayPal</option>
-                    <!-- Add more as you activate them, e.g., -->
-                    <!-- <option value="applepay">🍎 Apple Pay</option> -->
-                    <!-- <option value="googlepay">🤖 Google Pay</option> -->
                 </select>
             </div>
-            <button type="submit" class="w-full bg-teal-500 text-white py-2 px-4 rounded hover:bg-teal-600">Proceed to Payment</button>
+            <button type="submit" class="w-full bg-teal-500 text-white py-2 px-4 rounded hover:bg-teal-600">Proceed to Payment & Delivery</button>
         </form>
         <a href="{{ url_for('shop.view_cart') }}" class="block text-center mt-4 text-teal-500 hover:text-teal-600 underline">Back to Cart</a>
     </div>
